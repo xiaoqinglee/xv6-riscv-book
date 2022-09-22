@@ -186,7 +186,7 @@ be above memory that programs use for themselves.
 The trampoline page is also mapped at address {\tt TRAMPOLINE}
 in the kernel page table. See Figure~\ref{fig:as} and
 Figure~\ref{fig:xv6_layout}. Because the trampoline page is mapped in
-the user page table, without the {\tt PTE\_U} flag, traps can start
+the user page table, traps can start
 executing there in supervisor mode. Because the trampoline page is
 mapped at the same address in the kernel address space, the trap handler
 can continue to execute after it switches to the kernel page
@@ -196,8 +196,8 @@ The code for the {\tt uservec} trap handler is in {\tt trampoline.S}
 \lineref{kernel/trampoline.S:/^uservec/}.
 When {\tt uservec} starts, all 32 registers contain values owned by
 the interrupted user code. These 32 values need to be saved somewhere
-in memory, so that
-they can be restored when the trap returns to user space.
+in memory, so that later on
+the kernel can restore them before returning to user space.
 Storing to memory requires use of a register
 to hold the address,
 but at this point there are no general-purpose registers available!
@@ -231,7 +231,7 @@ kernel stack, the current CPU's hartid, the address of the {\tt usertrap}
 function,
 and the address of the kernel page table. {\tt uservec}
 retrieves these values, switches {\tt satp} to the kernel page table,
-and calls {\tt usertrap}.
+and jumps to {\tt usertrap}.
 
 The job of {\tt usertrap} is to determine
 the cause of the trap, process it, and return
@@ -259,10 +259,12 @@ killed or should yield the CPU (if this trap is a timer interrupt).
 The first step in returning to user space is the call to {\tt usertrapret}
 \lineref{kernel/trap.c:/^usertrapret/}.
 This function sets up the RISC-V control registers to prepare for a
-future trap from user space. This involves changing {\tt stvec}
-to refer to {\tt uservec}, preparing the trapframe fields that
-{\tt uservec} relies on, and setting {\tt sepc} to the previously
-saved user program counter. At the end, {\tt usertrapret}
+future trap from user space: setting {\tt stvec}
+to {\tt uservec} and preparing the trapframe fields that
+{\tt uservec} relies on.
+{\tt usertrapret} sets {\tt sepc} to the previously
+saved user program counter.
+At the end, {\tt usertrapret}
 calls {\tt userret} on the trampoline page that is mapped in
 both user and kernel page tables; the reason is that assembly
 code in {\tt userret} will switch page tables.
@@ -387,9 +389,10 @@ table,
 \lstinline{srcva} in
 \lstinline{pagetable}, yielding
 physical address \lstinline{pa0}.
-The kernel maps each physical RAM address to the corresponding
-kernel virtual address, so
-{\tt copyinstr} can directly copy string bytes from {\tt pa0} to {\tt dst}.
+The kernel's page table maps all of physical RAM 
+at virtual addresses that are equal to the RAM's physical address.
+This allows
+{\tt copyinstr} to directly copy string bytes from {\tt pa0} to {\tt dst}.
 {\tt walkaddr} 
 \lineref{kernel/vm.c:/^walkaddr/}
 checks that the user-supplied virtual address is part of
@@ -401,12 +404,13 @@ kernel to a user-supplied address.
 \section{Traps from kernel space}
 \label{s:ktraps}
 
-Xv6 configures the CPU trap registers somewhat differently depending
-on whether user or kernel code is executing.
-When the kernel is executing on a CPU, the kernel points {\tt stvec}
+Xv6 handles traps from kernel code in a different way
+than traps from user code.
+When entering the kernel, {\tt usertrap} points {\tt stvec}
 to the assembly code at {\tt kernelvec}
 \lineref{kernel/kernelvec.S:/^kernelvec/}.
-Since xv6 is already in the kernel, {\tt kernelvec} can rely
+Since {\tt kernelvec} only executes if
+xv6 was already in the kernel, {\tt kernelvec} can rely
 on {\tt satp} being set to the kernel page table, and on the
 stack pointer referring to a valid kernel stack.
 {\tt kernelvec} pushes all 32 registers onto the stack,
@@ -459,7 +463,7 @@ There's a window of time when the kernel has started executing
 but {\tt stvec} is still set to {\tt uservec}, and it's crucial that 
 no device interrupt occur during that window.
 Luckily the RISC-V always disables interrupts when it starts
-to take a trap, and xv6 doesn't enable them again until
+to take a trap, and {\tt usertrap} doesn't enable them again until
 after it sets {\tt stvec}.
 
 \section{Page-fault exceptions}
@@ -663,7 +667,7 @@ user and kernel virtual addresses don't overlap.
 
 Production operating systems implement copy-on-write fork, lazy
 allocation, demand paging, paging to disk, memory-mapped files, etc.
-Furthermore, production operating systems will try to use all of
+Furthermore, production operating systems try to use all of
 physical memory, either for applications or caches (e.g., the buffer
 cache of the file system, which we will cover later in
 Section~\ref{s:bcache}). Xv6 is na\"{i}ve in this regard: you want
