@@ -676,6 +676,12 @@ doesn't. Furthermore, if xv6 runs out of memory, it returns an error to
 the running application or kills it, instead of, for example, evicting
 a page of another application.
 
+Production operating systems also provide applications with system
+calls to manage their address spaces and implement their own
+page-fault handling through the {\tt mmap}, {\tt munmap}, and {\tt
+  sigaction} system calls, as well as providing calls to pin memory
+into RAM (see {\tt mlock}).
+
 \section{Exercises}
 
 \begin{enumerate}
@@ -699,5 +705,7 @@ a page of another application.
 
 \item Could xv6 be modified to eliminate the special {\tt
   TRAMPOLINE} page mapping?
+
+\item Implement {\tt mmap}.
 
 \end{enumerate}
