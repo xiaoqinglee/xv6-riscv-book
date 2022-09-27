@@ -680,7 +680,8 @@ Production operating systems also provide applications with system
 calls to manage their address spaces and implement their own
 page-fault handling through the {\tt mmap}, {\tt munmap}, and {\tt
   sigaction} system calls, as well as providing calls to pin memory
-into RAM (see {\tt mlock}).
+into RAM (see {\tt mlock}) and to advice the kernel how an application
+will use its virtual memory (see {\tt madvise).
 
 \section{Exercises}
 
