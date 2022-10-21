@@ -973,16 +973,13 @@ to wait for a reader to take some bytes
 out of the buffer.
 \lstinline{sleep}
 releases 
-\lstinline{pi->lock}
+the pipe's lock
 as part of putting
 \lstinline{pipewrite}'s
 process to sleep.
 
-Now that
-\lstinline{pi->lock}
-is available,
 \lstinline{piperead}
-manages to acquire it and enters its critical section:
+now acquires the pipe's lock and enters its critical section:
 it finds that
 \lstinline{pi->nread}
 \lstinline{!=}
@@ -1064,9 +1061,9 @@ as well as simultaneous
 
 \lstinline{wait} starts by acquiring
 \lstinline{wait_lock}
-\lineref{kernel/proc.c:/^wait/}.
-The reason is that \lstinline{wait_lock} acts as the condition
-lock that helps ensure that the parent doesn't miss a \lstinline{wakeup}
+\lineref{kernel/proc.c:/^wait/},
+which acts as the condition
+lock that helps ensure that \lstinline{wait} doesn't miss a \lstinline{wakeup}
 from an exiting child.
 Then \lstinline{wait} scans the process table.
 If it finds a child in \texttt{ZOMBIE} state,
@@ -1163,7 +1160,7 @@ If the victim process is in
 will cause the victim to return from
 \lstinline{sleep}.
 This is potentially dangerous because 
-the condition being waiting for may not be true.
+the condition being waited for for may not be true.
 However, xv6 calls to
 \lstinline{sleep}
 are always wrapped in a
