@@ -476,7 +476,7 @@ The xv6 kernel uses a mechanism called sleep and wakeup
 in these situations (and many others).
 Sleep allows a kernel thread to
 wait for a specific event; another thread can call wakeup 
-to indicate that threads waiting for an event should resume.
+to indicate that threads waiting for a specified event should resume.
 Sleep and wakeup are often called 
 \indextext{sequence coordination}
 or 
@@ -547,7 +547,7 @@ and
 \indexcode{wakeup},
 that work as follows.
 \lstinline{sleep(chan)}
-sleeps on the arbitrary value
+waits for an event designated by the value of
 \indexcode{chan},
 called the 
 \indextext{wait channel}.
@@ -555,7 +555,8 @@ called the
 puts the calling process to sleep, releasing the CPU
 for other work.
 \lstinline{wakeup(chan)}
-wakes all processes sleeping on
+wakes all processes that are in calls
+to \lstinline{sleep} with the same
 \lstinline{chan}
 (if any), causing their
 \lstinline{sleep}
@@ -735,11 +736,12 @@ check of
 \lstinline{s->count}
 and its call to
 \lstinline{sleep}.
-Note, however, that we need
+However, 
 \lstinline{sleep}
-to atomically release
+must release
 \lstinline{s->lock}
-and put the consuming process to sleep,
+and put the consuming process to sleep
+in a way that's atomic from the point of view of \lstinline{wakeup},
 in order to avoid lost wakeups.
 
 %% 
@@ -752,9 +754,7 @@ Xv6's
 and
 \indexcode{wakeup}
 \lineref{kernel/proc.c:/^wakeup/}
-provide the interface shown in the last example above,
-and their implementation (plus rules for how to use them)
-ensures that there are no lost wakeups.
+provide the interface used in the last example above.
 The basic idea is to have
 \lstinline{sleep}
 mark the current process as
@@ -777,46 +777,17 @@ of a kernel data structure involved in the waiting.
 \lstinline{sleep}
 acquires 
 \indexcode{p->lock}
-\lineref{kernel/proc.c:/DOC: sleeplock1/}.
-Now the process going to sleep holds both
-\lstinline{p->lock}
-and
+\lineref{kernel/proc.c:/DOC: sleeplock1/}
+and {\it only then} releases
 \lstinline{lk}.
-Holding
-\lstinline{lk}
-was necessary in the caller (in the example,
-\lstinline{P}):
-it
-ensured that no other process (in the example,
-one running
-\lstinline{V})
-could start a call to
-\lstinline{wakeup(chan)}.
+As we'll see, the fact that \lstinline{sleep}
+holds one or the other of these locks at all times is what
+prevents a concurrent \lstinline{wakeup}
+(which must acquire and hold both) from acting.
 Now that
 \lstinline{sleep}
-holds
+holds just
 \lstinline{p->lock},
-it is safe to release
-\lstinline{lk}:
-some other process may start a call to
-\lstinline{wakeup(chan)},
-but
-\indexcode{wakeup}
-will wait to acquire
-\indexcode{p->lock},
-and thus will wait until
-\lstinline{sleep}
-has finished putting the process to sleep,
-keeping the
-\lstinline{wakeup}
-from missing the
-\lstinline{sleep}.
-
-Now that
-\lstinline{sleep}
-holds
-\lstinline{p->lock}
-and no others,
 it can put the process to sleep by recording
 the sleep channel,
 changing the process state to \texttt{SLEEPING},
@@ -848,36 +819,29 @@ loops over the process table
 \lineref{kernel/proc.c:/^wakeup\(/}.
 It acquires the
 \lstinline{p->lock}
-of each process it inspects,
-both because it may manipulate that process's state
-and because
-\lstinline{p->lock}
-ensures that
-\lstinline{sleep}
-and
-\lstinline{wakeup}
-do not miss each other.
+of each process it inspects.
 When \lstinline{wakeup} finds a process in state
 \indexcode{SLEEPING}
 with a matching
 \indexcode{chan},
 it changes that process's state to
 \indexcode{RUNNABLE}.
-The next time the scheduler runs, it will
+The next time \lstinline{scheduler} runs, it will
 see that the process is ready to be run.
 
 Why do the locking rules for 
 \lstinline{sleep}
 and
 \lstinline{wakeup}
-ensure a sleeping process won't miss a wakeup?
-The sleeping process holds either
+ensure that a process that's going to sleep
+won't miss a concurrent wakeup?
+The going-to-sleep process holds either
 the condition lock or its own
 \lstinline{p->lock} 
-or both from a point before it checks the condition
-to a point after it is marked \texttt{SLEEPING}.
+or both from {\it before} it checks the condition
+until {\it after} it is marked \texttt{SLEEPING}.
 The process calling \texttt{wakeup} holds \textit{both}
-of those locks in \texttt{wakeup}'s loop.
+locks in \texttt{wakeup}'s loop.
 Thus the waker either makes the condition true before
 the consuming thread checks the condition;
 or the waker's \lstinline{wakeup} examines the sleeping
@@ -887,7 +851,7 @@ Then
 will see the sleeping process and wake it up
 (unless something else wakes it up first).
 
-It is sometimes the case that multiple processes are sleeping
+Sometimes multiple processes are sleeping
 on the same channel; for example, more than one process
 reading from a pipe.
 A single call to 
@@ -896,7 +860,7 @@ will wake them all up.
 One of them will run first and acquire the lock that
 \lstinline{sleep}
 was called with, and (in the case of pipes) read whatever
-data is waiting in the pipe.
+data is waiting.
 The other processes will find that, despite being woken up,
 there is no data to be read.
 From their point of view the wakeup was ``spurious,'' and
