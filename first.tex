@@ -57,14 +57,15 @@ and much of its low-level
 functionality (for example, its process implementation) is specific to
 RISC-V.  RISC-V is a 64-bit CPU, and xv6 is written in ``LP64'' C,
 which means long (L) and pointers (P) in the C programming language
-are 64 bits, but int is 32-bit.  This book assumes the reader has done
+are 64 bits, but an {\tt int} is 32 bits.  This book assumes the reader has done
 a bit of machine-level programming on some architecture, and will
-introduce RISC-V-specific ideas as they come up.  A useful reference
-for RISC-V is ``The RISC-V Reader: An Open Architecture
-Atlas''~\cite{riscv}.
-The user-level ISA~\cite{riscv:user} and the privileged
-architecture~\cite{riscv:priv} are the official
+introduce RISC-V-specific ideas as they come up.
+The user-level ISA~\cite{riscv:user} and privileged
+architecture~\cite{riscv:priv} documents are the complete
 specifications.
+You may also refer to
+``The RISC-V Reader: An Open Architecture
+Atlas''~\cite{riscv}.
 
 The CPU in a complete computer is surrounded by support hardware, much
 of it in the form of I/O interfaces. Xv6 is written for the support
@@ -118,7 +119,7 @@ abstraction than direct use of the disk.
 Similarly, Unix transparently switches hardware CPUs among processes,
 saving and restoring register state as necessary,
 so that applications don't have to be
-aware of time sharing.  This transparency allows the operating system to share
+aware of time-sharing.  This transparency allows the operating system to share
 CPUs even if some applications are in infinite loops.
 
 As another example, Unix processes use 
@@ -142,7 +143,7 @@ The system-call interface in
 Figure~\ref{fig:api}
 is carefully designed to provide both programmer convenience and
 the possibility of strong isolation.  The Unix interface
-is not the only way to abstract resources, but it has proven to be a very good
+is not the only way to abstract resources, but it has proved to be a good
 one.
 
 %% 
@@ -165,7 +166,7 @@ the CPU can execute instructions:
 \indextext{user mode}.
 Instructions executing in machine mode have full privilege; a
 CPU starts in machine mode.  Machine mode is mostly intended for
-configuring a computer.  Xv6 executes a few lines in machine mode and
+setting up the computer during boot.  Xv6 executes a few lines in machine mode and
 then changes to supervisor mode.
 
 In supervisor mode the CPU is allowed to execute 
@@ -219,14 +220,15 @@ run in supervisor mode.
 This organization is called a
 \indextext{monolithic kernel}.
 
-In this organization the entire operating system runs with full hardware
+In this organization the entire operating system consists of a single
+program running with full hardware
 privilege. This organization is convenient because the OS designer doesn't have
-to decide which part of the operating system doesn't need full hardware
+to decide which parts of the operating system don't need full hardware
 privilege.  Furthermore, it is easier for different parts of the operating system to
 cooperate.  For example, an operating system might have a buffer cache that can
 be shared both by the file system and the virtual memory system. 
 
-A downside of the monolithic organization is that the interfaces between
+A downside of the monolithic organization is that the interactions among
 different parts of the operating system are often complex (as we will see in the
 rest of this text), and therefore it is easy for an operating system developer
 to make a mistake.  In a monolithic kernel, a mistake is fatal, because an error
@@ -266,7 +268,7 @@ resides in user-level servers.
 In the real world, both monolithic kernels and microkernels are
 popular. Many
 Unix kernels are monolithic. For example, Linux has a monolithic kernel,
-although some OS functions run as user-level servers (e.g., the windowing
+although some OS functions run as user-level servers (e.g., the window
 system).  Linux delivers high performance to OS-intensive applications, partially
 because the subsystems of the kernel can be tightly integrated.
 
@@ -404,13 +406,14 @@ looking up virtual addresses in page tables;
 and xv6 only uses 38 of those 39 bits.
 Thus, the maximum address is $2^{38}-1$ =
 0x3fffffffff, which is \lstinline{MAXVA}~\lineref{kernel/riscv.h:/define.MAXVA/}.
-At the top of the address space xv6 reserves a page
-for a \indextext{trampoline} and a page mapping
-the process's \indextext{trapframe}.  Xv6 uses these two pages
+At the top of the address space xv6 places
+a \indextext{trampoline} page (4096 bytes)
+and a \indextext{trapframe} page.  Xv6 uses these two pages
 to transition into the kernel and back;
 the trampoline page contains the code to transition in and out
-of the kernel and mapping the trapframe is necessary to save/restore the
-state of the user process, as we will explain in Chapter~\ref{CH:TRAP}.
+of the kernel, and the trapframe is where the kernel saves
+the process's user registers,
+as Chapter~\ref{CH:TRAP} explains.
 
 The xv6 kernel maintains many pieces of state for each process,
 which it gathers into a
@@ -425,12 +428,16 @@ to refer to elements of the
 structure; for example,
 \indexcode{p->pagetable} is a pointer to the process's page table.
 
-Each process has a thread of execution (or 
+Each process has a thread of control (or 
 \indextext{thread}
-for short) that executes the process's instructions.
-A thread can be suspended and later resumed.
-To switch transparently between processes,
-the kernel suspends the currently running thread and resumes another process's
+for short) that holds the state needed to execute the process.
+At any given time, a thread might be executing on a CPU,
+or suspended (not executing, but capable of resuming executing
+in the future).
+To switch a CPU between processes,
+the kernel suspends the thread currently running on that CPU
+and saves its state,
+and restores the state of another process's previously-suspended
 thread.  Much of the state of a thread (local variables, function call return
 addresses) is stored on the thread's stacks.
 Each process has two stacks: a user stack and a kernel stack
@@ -449,7 +456,7 @@ can execute even if a process has wrecked its user stack.
 A process can make a system call by executing the RISC-V \indexcode{ecall}
 instruction. This instruction raises the hardware privilege level and
 changes the program counter to a kernel-defined entry point.  The code
-at the entry point switches to a kernel stack and executes the kernel
+at the entry point switches to the process's kernel stack and executes the kernel
 instructions that implement the system call.  When the system call
 completes, the kernel switches back to the user stack and returns to
 user space by calling the \indexcode{sret} instruction, which lowers
@@ -460,7 +467,7 @@ when the I/O has finished.
 
 \indexcode{p->state} 
 indicates whether the process is allocated, ready
-to run, running, waiting for I/O, or exiting.
+to run, currently running on a CPU, waiting for I/O, or exiting.
 
 \indexcode{p->pagetable}
 holds the process's page table, in the format
@@ -473,7 +480,7 @@ addresses of the physical pages allocated to store the process's
 memory.
 
 In summary, a process bundles two design ideas: an address space to
-give a process the illusion of its own memory, and, a thread, to give
+give a process the illusion of its own memory, and a thread to give
 the process the illusion of its own CPU.  In xv6, a process consists
 of one address space and one thread.  In real operating systems a
 process may have more than one thread to take advantage of multiple CPUs.
@@ -535,8 +542,8 @@ provides the instruction
 \lstinline{mret}.
 This instruction is most often used to return from
 a previous call from supervisor mode to machine mode.
-\lstinline{start} isn't returning from such a call, and
-instead sets things up as if there had been one:
+\lstinline{start} isn't returning from such a call, but
+sets things up as if it were:
 it sets the previous privilege mode to
 supervisor in the register
 \lstinline{mstatus},
@@ -567,7 +574,8 @@ mode by calling
 This causes the program counter to change
 to
 \lstinline{main}
-\lineref{kernel/main.c:/^main/}.
+\lineref{kernel/main.c:/^main/},
+the address previously stored in \lstinline{mepc}.
 
 After
 \lstinline{main}
@@ -589,7 +597,7 @@ and then calls \lstinline{ecall} to re-enter the kernel.
 The kernel uses the number in register {\tt a7} in \lstinline{syscall}
 \lineref{kernel/syscall.c:/^syscall/} to call the desired system call.
 The system call table \lineref{kernel/syscall.c:/syscalls/} maps
-\lstinline{SYS_EXEC} to \lstinline{sys_exec}, which the kernel
+\lstinline{SYS_EXEC} to the function \lstinline{sys_exec}, which the kernel
 invokes.  As we saw in Chapter~\ref{CH:UNIX}, \indexcode{exec}
 replaces the memory and registers of the current process with a new
 program (in this case, \indexcode{/init}).
@@ -610,8 +618,9 @@ The system is up.
 
 You may wonder how the operating system deals with buggy or malicious
 code. Because coping with malice is strictly harder than dealing with
-accidental bugs, it's reasonable to view this topic as relating to
-security. Here's a high-level view of typical security assumptions and
+accidental bugs, it's reasonable to 
+focus mostly on providing security against malice.
+Here's a high-level view of typical security assumptions and
 goals in operating system design.
 
 The operating system must assume that a process's user-level code will
@@ -622,7 +631,7 @@ for user code; it may try to read and write any RISC-V control
 register; it may try to directly access device hardware;
 and it may pass clever values to system calls in an attempt
 to trick the kernel into crashing or doing something stupid. The
-kernel's goal to restrict each user processes so that all it can do is
+kernel's goal is to restrict each user processes so that all it can do is
 read/write/execute its own user memory, use the 32 general-purpose
 RISC-V registers, and affect the kernel and other processes in the
 ways that system calls are intended to allow. The kernel must prevent
@@ -647,7 +656,7 @@ Of course in real life things are not so straightforward. It's
 difficult to prevent clever user code from making a system unusable
 (or causing it to panic) by consuming kernel-protected resources --
 disk space, CPU time, process table slots, etc. It's usually
-impossible to write bug-free code or design bug-free hardware; if the
+impossible to write bug-free kernel code or design bug-free hardware; if the
 writers of malicious user code are aware of kernel or hardware bugs,
 they will exploit them. Even in mature, widely-used kernels, such as
 Linux, people discover new vulnerabilities
@@ -670,7 +679,7 @@ processes look similar to xv6's.  Modern operating systems, however,
 support several threads within a process, to allow a single process to
 exploit multiple CPUs.  Supporting multiple threads in a
 process involves quite a bit of machinery that xv6 doesn't have,
-including potential interface changes (e.g., Linux's
+often including interface changes (e.g., Linux's
 \lstinline{clone},
 a variant of
 \lstinline{fork}),
