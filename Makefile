@@ -2,7 +2,7 @@ SRC=xv6-riscv-src/
 
 T=latex.out
 
-TEX=$(wildcard $(T)/*.tex)
+TEX=$(patsubst %,$(T)/%,$(wildcard *.tex))
 SPELLTEX=$(wildcard *.tex)
 
 all: book.pdf
