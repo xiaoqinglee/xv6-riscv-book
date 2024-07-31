@@ -566,8 +566,8 @@ the lock), instead of calling panic, as the xv6 kernel does.
 It turns out, however, that re-entrant locks make it harder to reason
 about concurrency: re-entrant locks break the intuition that locks
 cause critical sections to be atomic with respect to other critical
-sections.  Consider the following two functions \lstinline{f} and
-\lstinline{g}:
+sections.  Consider the following functions \lstinline{f}
+and \lstinline{g}, and a hypothetical function \lstinline{h}:
 
 \begin{lstlisting}
 struct spinlock lock;
@@ -590,6 +590,10 @@ g() {
     data = 1;
   }
   release(&lock);
+}
+
+h() {
+    ...
 }
 \end{lstlisting}
 
