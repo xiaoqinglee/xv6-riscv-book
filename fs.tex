@@ -1072,11 +1072,11 @@ writes that start at or cross the end of the file
 grow the file, up to the maximum file size
 \linerefs{kernel/fs.c:/^..if.off.\+.n.>.MAXFILE/,/./};
 the loop copies data into the buffers instead of out
-\lineref{kernel/fs.c:/memmove.*bp->data/};
+\lineref{kernel/fs.c:/either.copyin.*bp->data/};
 and if the write has extended the file,
 \indexcode{writei}
 must update its size
-\linerefs{kernel/fs.c:/^..if.n.>.0./,/^..}/}.
+\linerefs{kernel/fs.c:/^..if.off.>.ip->size\)/,/./}.
 
 %% Both
 %% \indexcode{readi}
@@ -1171,7 +1171,7 @@ returns an error
 \linerefs{kernel/fs.c:/Check.that.name.is.not.present/,/^..}/}.
 The main loop reads directory entries looking for an unallocated entry.
 When it finds one, it stops the loop early
-\linerefs{kernel/fs.c:/^....if.de.inum.==.0/,/./},
+\linerefs{kernel/fs.c:/Look for an empty dirent/,/.*break/},
 with 
 \lstinline{off}
 set to the offset of the available entry.
@@ -1184,7 +1184,7 @@ Either way,
 then adds a new entry to the directory
 by writing at offset
 \lstinline{off}
-\linerefs{kernel/fs.c:/^..strncpy/,/panic/}.
+\linerefs{kernel/fs.c:/if.writei/,/return -1/}.
 %% 
 %% 
 %% 

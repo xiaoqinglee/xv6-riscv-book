@@ -1175,7 +1175,7 @@ also test
 in the loop, and abandon the current activity if it is set.
 This is only done when such abandonment would be correct.
 For example, the pipe read and write code
-\lineref{kernel/pipe.c:/myproc..-\>killed/} 
+\lineref{kernel/pipe.c:/killed.pr/} 
 returns if the killed flag is set; eventually the
 code will return back to trap, which will again
 check \lstinline{p->killed} and exit.
