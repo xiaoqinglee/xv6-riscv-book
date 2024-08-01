@@ -867,13 +867,6 @@ no links to it and
 is one. That one reference is the reference owned by the
 thread calling
 \lstinline{iput}.
-It's true that 
-\lstinline{iput}
-checks that the reference count is one outside of its
-\lstinline{itable.lock}
-critical section, but at that point the link
-count is known to be zero, so no thread will try
-to acquire a new reference.
 The other main danger is that a concurrent call to
 \lstinline{ialloc}
 might choose the same inode that
