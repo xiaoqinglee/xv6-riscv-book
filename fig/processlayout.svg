@@ -6,7 +6,7 @@
    id="svg2976"
    height="744.09448"
    width="1052.3622"
-   inkscape:export-filename="processlayout.pdf"
+   inkscape:export-filename="processlayout.jpg"
    inkscape:export-xdpi="300"
    inkscape:export-ydpi="300"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -280,30 +280,14 @@
          id="tspan6321"
          sodipodi:role="line">address of argument 0</tspan></text>
     <text
-       id="text6323"
-       y="688.94611"
-       x="490.22742"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:0%;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans';text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
-       xml:space="preserve"><tspan
-         style="font-size:24px;line-height:1.25"
-         y="688.94611"
-         x="490.22742"
-         id="tspan6325"
-         sodipodi:role="line">address of address of</tspan><tspan
-         style="font-size:24px;line-height:1.25"
-         id="tspan6333"
-         y="718.94611"
-         x="490.22742"
-         sodipodi:role="line"> argument 0</tspan></text>
-    <text
        id="text6335"
-       y="812.02112"
-       x="561.99066"
+       y="752.77869"
+       x="567.58057"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:0%;font-family:'American Typewriter';-inkscape-font-specification:'American Typewriter';fill:#000000;fill-opacity:1;stroke:none"
        xml:space="preserve"><tspan
          style="font-size:24px;line-height:1.25"
-         y="812.02112"
-         x="561.99066"
+         y="752.77869"
+         x="567.58057"
          id="tspan6337"
          sodipodi:role="line">(empty)</tspan></text>
     <text
@@ -356,10 +340,6 @@
        id="path6463"
        d="m 469.93003,664.357 c 302.66676,0 303.80466,-1.13784 303.80466,-1.13784"
        style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
-    <path
-       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 469.93003,724.66279 c 302.66676,0 303.80466,-1.13784 303.80466,-1.13784"
-       id="path6465" />
     <text
        id="text6471"
        y="562.27179"
@@ -370,16 +350,16 @@
          y="562.27179"
          x="775.74969"
          id="tspan6473"
-         sodipodi:role="line">nul-terminated string</tspan></text>
+         sodipodi:role="line">null-terminated string</tspan></text>
     <text
        id="text6475"
        y="593.43933"
-       x="779.03979"
+       x="776.28882"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:0%;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans';text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
        xml:space="preserve"><tspan
          style="font-size:24px;line-height:1.25"
          y="593.43933"
-         x="779.03979"
+         x="776.28882"
          id="tspan6477"
          sodipodi:role="line">argv[argc]</tspan></text>
     <text
@@ -393,17 +373,6 @@
          x="777.58234"
          id="tspan6481"
          sodipodi:role="line">argv[0]</tspan></text>
-    <text
-       id="text6483"
-       y="700.76801"
-       x="774.87256"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:0%;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans';text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
-       xml:space="preserve"><tspan
-         style="font-size:24px;line-height:1.25"
-         y="700.76801"
-         x="774.87256"
-         id="tspan6485"
-         sodipodi:role="line">argv argument of main</tspan></text>
     <path
        transform="translate(0,308.2677)"
        id="path6495"
