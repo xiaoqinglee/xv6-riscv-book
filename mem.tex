@@ -619,7 +619,7 @@ all address spaces, but can be used only by the kernel.
 
 \begin{figure}[t]
 \center
-\includegraphics[scale=0.5]{fig/processlayout.pdf}
+\includegraphics[scale=0.5]{fig/processlayout.jpg}
 \caption{A process's user address space, with its initial stack.}
 \label{fig:processlayout}
 \end{figure}
@@ -766,13 +766,10 @@ It places a null pointer at the end of what will be the
 \indexcode{argv}
 list passed to
 \lstinline{main}.
-The first three entries in
-\lstinline{ustack}
-are the fake return program counter,
-\indexcode{argc},
-and
-\lstinline{argv}
-pointer.
+The values for \indexcode{argc} and \lstinline{argv} are passed to \lstinline{main}
+through the system-call return path:  \lstinline{argc} is passed via the
+system call return value, which goes in {\tt a0}, and \lstinline{argv} is passed through
+the {\tt a1} entry of the process's trapframe.
 
 \lstinline{exec}
 places an inaccessible page just below the stack page,
