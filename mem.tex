@@ -636,7 +636,7 @@ call is implemented by the function
 or negative.
 \lstinline{uvmalloc}
 \lineref{kernel/vm.c:/^uvmalloc/}
-allocates physical memory with {\tt kalloc},
+allocates physical memory with {\tt kalloc}, zeros the allocated memory,
 and adds PTEs to the user page table with {\tt mappages}.
 \lstinline{uvmdealloc} calls
 {\tt uvmunmap}

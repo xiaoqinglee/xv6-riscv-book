@@ -142,7 +142,7 @@ int kill(int pid) & Terminate process PID. Returns 0, or -1 for error. \\
 int getpid() & Return the current process's PID. \\
 int sleep(int n) & Pause for n clock ticks. \\
 int exec(char *file, char *argv[]) & Load a file and execute it with arguments; only returns if error. \\
-char *sbrk(int n) & Grow process's memory by n bytes. Returns start of new memory. \\
+char *sbrk(int n) & Grow process's memory by n zero bytes. Returns start of new memory. \\
 int open(char *file, int flags) & Open a file; flags indicate read/write; returns an fd (file descriptor). \\
 int write(int fd, char *buf, int n) & Write n bytes from buf to file descriptor fd; returns n. \\
 int read(int fd, char *buf, int n) & Read n bytes into buf; returns number read; or 0 if end of file. \\
@@ -348,7 +348,7 @@ A process that needs more memory at run-time (perhaps for
 can call
 \lstinline{sbrk(n)}
 to grow its data memory by
-\lstinline{n}
+\lstinline{n} zero
 bytes;
 \indexcode{sbrk}
 returns the location of the new memory.
