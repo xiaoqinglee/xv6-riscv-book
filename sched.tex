@@ -47,7 +47,7 @@ locking plan is necessary to avoid races. Fourth, a process's
 memory and other resources must be freed when the process exits,
 but it cannot do all of this itself
 because (for example) it can't free its own kernel stack while still using it.
-Fifth, each core of a multi-core machine must remember which
+Fifth, each CPU of a multi-core machine must remember which
 process it is executing so that system calls affect the correct
 process's kernel state.
 Finally,  \lstinline{sleep} and \lstinline{wakeup} allow a process to give up
@@ -78,9 +78,9 @@ Xv6 has separate threads
 (saved registers and stacks)
 in which to execute the scheduler because
 it is not safe for the scheduler to execute on
-any process's kernel stack: some other core might
+any process's kernel stack: some other CPU might
 wake the process up and run it, and it would be a disaster
-to use the same stack on two different cores.
+to use the same stack on two different CPUs.
 There is a separate scheduler thread for each CPU to cope
 with situations in which more than one CPU is running
 a process that wants to give up the CPU.
@@ -382,8 +382,8 @@ to start running it
 Xv6 often needs a pointer to the current process's \lstinline{proc}
 structure. On a uniprocessor one could have a global variable pointing
 to the current \lstinline{proc}. This doesn't work on a multi-core
-machine, since each core executes a different process. The way to
-solve this problem is to exploit the fact that each core has its own
+machine, since each CPU executes a different process. The way to
+solve this problem is to exploit the fact that each CPU has its own
 set of registers.
 
 While a given CPU is executing in the kernel, xv6 ensures that the CPU's \lstinline{tp}
@@ -1211,7 +1211,7 @@ that it must be held while reading or writing any of the following
 and
 \lstinline{p->pid}.
 These fields can be used by other processes, or by scheduler
-threads on other cores, so it's natural that they
+threads on other CPUs, so it's natural that they
 must be protected by a lock.
 
 However, most uses of \lstinline{p->lock} are protecting higher-level
@@ -1240,12 +1240,12 @@ not yet yielded the CPU.
 % it atomicizes the setting of the state to ZOMIE and the yielding
 % of the CPU.
 
-\item It prevents another core's scheduler from deciding to run
+\item It prevents another CPU's scheduler from deciding to run
 a yielding process after it sets its state to \lstinline{RUNNABLE} but
 before it finishes \lstinline{swtch}.
 % it atomizes the setting of p->state and swtch().
 
-\item It ensures that only one core's scheduler decides to run a
+\item It ensures that only one CPU's scheduler decides to run a
   \lstinline{RUNNABLE} processes.
 % it atomicizes a scheduler's check for RUNNABLE and actually
 % running the process. or setting state to RUNNING.
@@ -1485,7 +1485,7 @@ if it is killed by another process.
   one process's kernel thread to another, rather than switching
   through the scheduler thread. The yielding thread will need to select
   the next thread itself and call \texttt{swtch}. The challenges will
-  be to prevent multiple cores from executing the same thread accidentally;
+  be to prevent multiple CPUs from executing the same thread accidentally;
   to get the locking right; and to avoid deadlocks.
 
 \item Modify xv6's
@@ -1497,6 +1497,6 @@ RISC-V
 instruction
 when no processes are runnable.
 Try to ensure that, any time there are runnable processes waiting
-to run, no cores are pausing in \texttt{WFI}.
+to run, no CPUs are pausing in \texttt{WFI}.
 
 \end{enumerate}

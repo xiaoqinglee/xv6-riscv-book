@@ -210,8 +210,8 @@ and calls {\tt clockintr}
 \lineref{kernel/trap.c:/clockintr/}.
 The latter function increments {\tt ticks},
 allowing the kernel to track the
-passage of time. The increment occurs on only one core, to avoid time
-passing faster if there are multiple cores.
+passage of time. The increment occurs on only one CPU, to avoid time
+passing faster if there are multiple CPUs.
 {\tt clockintr} wakes up any processes waiting in the {\tt sleep}
 system call,
 and schedules the next timer interrupt by writing
@@ -220,14 +220,14 @@ and schedules the next timer interrupt by writing
 {\tt devintr} returns 2 for a timer interrupt
 in order to indicate to {\tt kerneltrap}
 or {\tt usertrap} that they should call {\tt yield} so that
-cores can be multiplexed among runnable processes.
+CPUs can be multiplexed among runnable processes.
 
 The fact that kernel code can be interrupted by a timer interrupt that
 forces a context switch via {\tt yield} is part of the reason why
 early code in {\tt usertrap} is careful to save state such as {\tt
   sepc} before enabling interrupts. These context switches also mean
 that kernel code must be written in the knowledge that it may move
-from one core to another without warning.
+from one CPU to another without warning.
 
 \section{Real world}
 
