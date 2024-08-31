@@ -642,7 +642,7 @@ though the count is non-zero.
 The root of this problem is that the
 invariant that
 \lstinline{P}
-only sleeps when
+sleeps only when
 \lstinline{s->count}
 \lstinline{==}
 \lstinline{0}
@@ -989,7 +989,9 @@ it finds that
 went to sleep because
 \lstinline{pi->nwrite}
 \lstinline{==}
-\lstinline{pi->nread+PIPESIZE}
+\lstinline{pi->nread}
+\lstinline{+}
+\lstinline{PIPESIZE}
 \lineref{kernel/pipe.c:/pipewrite-full/}),
 so it falls through to the 
 \lstinline{for}
