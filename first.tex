@@ -401,9 +401,9 @@ that the process can expand as needed.
 There are a number of factors that limit the
 maximum size of a process's address space:
 pointers on the RISC-V are 64 bits wide;
-the hardware only uses the low 39 bits when
+the hardware uses only the low 39 bits when
 looking up virtual addresses in page tables;
-and xv6 only uses 38 of those 39 bits.
+and xv6 uses only 38 of those 39 bits.
 Thus, the maximum address is $2^{38}-1$ =
 0x3fffffffff, which is \lstinline{MAXVA}~\lineref{kernel/riscv.h:/define.MAXVA/}.
 At the top of the address space xv6 places
