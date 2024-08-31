@@ -633,7 +633,10 @@ wasted when a page is allocated or loaded but either never used or
 evicted before it can be used.
 
 Other features that combine paging and page-fault exceptions include
-automatically extending stacks and memory-mapped files.
+automatically extending stacks and \indextext{memory-mapped files},
+which are files that a program mapped into its address space using
+the \texttt{mmap} system call so that the program can read and write
+them using load and store instructions.
 
 \section{Real world}
 
